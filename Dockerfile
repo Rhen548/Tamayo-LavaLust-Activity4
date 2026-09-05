@@ -8,13 +8,22 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli
 # Enable Apache rewrite
 RUN a2enmod rewrite
 
-# Allow .htaccess overrides
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# Make /public the Apache document root
+RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /var/www/html/public#g' \
+    /etc/apache2/sites-available/000-default.conf
 
-# Copy project files
+# Allow .htaccess inside public
+RUN printf '<Directory /var/www/html/public>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>\n' \
+    > /etc/apache2/conf-available/lavalust.conf \
+    && a2enconf lavalust
+
+# Copy application
 COPY . /var/www/html/
 
-# Fix permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
