@@ -88,7 +88,11 @@ $config['date_default_timezone'] = 'Asia/Manila';
 | WARNING: You MUST set this value!
 |
 */
-$config['base_url'] 				= '';
+$render_url = getenv('RENDER_EXTERNAL_URL');
+
+$config['base_url'] = $render_url
+    ? rtrim($render_url, '/') . '/'
+    : 'http://127.0.0.1:8000/';
 
 /*
 |--------------------------------------------------------------------------
